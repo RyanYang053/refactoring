@@ -11,21 +11,38 @@ public class StatementPrinter {
     private Invoice invoice;
     private Map<String, Play> plays;
 
+    /**
+     * Creates a new statement printer.
+     *
+     * @param invoice the invoice containing the performances
+     * @param plays   the map from play ID to play information
+     */
     public StatementPrinter(Invoice invoice, Map<String, Play> plays) {
         this.invoice = invoice;
         this.plays = plays;
     }
 
+    /**
+     * Returns the invoice for this printer.
+     *
+     * @return the invoice
+     */
     public Invoice getInvoice() {
         return invoice;
     }
 
+    /**
+     * Returns the map of plays for this printer.
+     *
+     * @return the plays map
+     */
     public Map<String, Play> getPlays() {
         return plays;
     }
 
     /**
      * Returns a formatted statement of the invoice associated with this printer.
+     *
      * @return the formatted statement
      * @throws RuntimeException if one of the play types is not known
      */
@@ -47,7 +64,11 @@ public class StatementPrinter {
         return result.toString();
     }
 
-    /** Calculates total amount owed across all performances. */
+    /**
+     * Calculates the total amount owed for all performances in the invoice.
+     *
+     * @return the total amount in cents
+     */
     public int getTotalAmount() {
         int totalAmount = 0;
         for (Performance p : invoice.getPerformances()) {
@@ -56,7 +77,12 @@ public class StatementPrinter {
         return totalAmount;
     }
 
-    /** Calculates total volume credits across all performances. */
+    /**
+     * Calculates the total volume credits earned for all performances
+     * in the invoice.
+     *
+     * @return the total volume credits
+     */
     public int getTotalVolumeCredits() {
         int volumeCredits = 0;
         for (Performance p : invoice.getPerformances()) {
@@ -65,28 +91,53 @@ public class StatementPrinter {
         return volumeCredits;
     }
 
-    /** Helper to calculate credits for a single performance. */
+    /**
+     * Calculates the volume credits earned for a single performance.
+     *
+     * @param performance the performance to evaluate
+     * @return the volume credits earned for the performance
+     */
     public int getVolumeCredits(Performance performance) {
         int result = 0;
+
         result += Math.max(
                 performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
 
         if ("comedy".equals(getPlay(performance).getType())) {
             result += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
         }
+
         return result;
     }
 
-    /** Helper to format values as US dollars. */
+    /**
+     * Formats an amount in cents as a US currency string.
+     *
+     * @param amount the amount in cents
+     * @return the formatted currency string
+     */
     public static String usd(int amount) {
-        return NumberFormat.getCurrencyInstance(Locale.US)
-                .format(amount / (double) Constants.PERCENT_FACTOR);
+        return NumberFormat.getCurrencyInstance(Locale.US).format(
+                amount / (double) Constants.PERCENT_FACTOR);
     }
 
+    /**
+     * Returns the play associated with the given performance.
+     *
+     * @param performance the performance whose play is requested
+     * @return the play corresponding to the performance
+     */
     public Play getPlay(Performance performance) {
         return plays.get(performance.getPlayID());
     }
 
+    /**
+     * Calculates the charge amount, in cents, for a single performance.
+     *
+     * @param performance the performance to price
+     * @return the charge amount in cents
+     * @throws RuntimeException if the play type is unknown
+     */
     public int getAmount(Performance performance) {
         int result = 0;
         final Play play = getPlay(performance);
