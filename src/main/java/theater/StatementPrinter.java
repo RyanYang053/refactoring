@@ -30,7 +30,7 @@ public class StatementPrinter {
      * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
-        final int volumeCredits = getVolumeCredits();
+        final int volumeCredits = getTotalVolumeCredits();
         final int totalAmount = getTotalAmount();
         final StringBuilder result = new StringBuilder(
                 "Statement for " + invoice.getCustomer() + System.lineSeparator());
@@ -38,16 +38,17 @@ public class StatementPrinter {
         for (Performance p : invoice.getPerformances()) {
             result.append(String.format("  %s: %s (%s seats)%n",
                     getPlay(p).getName(),
-                    getFormat(getAmount(p)),
+                    usd(getAmount(p)),
                     p.getAudience()));
         }
 
-        result.append(String.format("Amount owed is %s%n", getFormat(totalAmount)));
+        result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
     }
 
-    private int getTotalAmount() {
+    /** Calculates total amount owed across all performances. */
+    public int getTotalAmount() {
         int totalAmount = 0;
         for (Performance p : invoice.getPerformances()) {
             totalAmount += getAmount(p);
@@ -55,7 +56,8 @@ public class StatementPrinter {
         return totalAmount;
     }
 
-    private int getVolumeCredits() {
+    /** Calculates total volume credits across all performances. */
+    public int getTotalVolumeCredits() {
         int volumeCredits = 0;
         for (Performance p : invoice.getPerformances()) {
             volumeCredits += getVolumeCredits(p);
@@ -63,30 +65,29 @@ public class StatementPrinter {
         return volumeCredits;
     }
 
-    private int getVolumeCredits(Performance performance) {
+    /** Helper to calculate credits for a single performance. */
+    public int getVolumeCredits(Performance performance) {
         int result = 0;
-
         result += Math.max(
                 performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
 
         if ("comedy".equals(getPlay(performance).getType())) {
             result += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
         }
-
         return result;
     }
 
-    private static String getFormat(int totalAmount) {
-        return NumberFormat.getCurrencyInstance(Locale.US).format(
-                totalAmount / Constants.PERCENT_FACTOR);
+    /** Helper to format values as US dollars. */
+    public static String usd(int amount) {
+        return NumberFormat.getCurrencyInstance(Locale.US)
+                .format(amount / (double) Constants.PERCENT_FACTOR);
     }
 
-    private Play getPlay(Performance performance) {
-        final Play play = plays.get(performance.getPlayID());
-        return play;
+    public Play getPlay(Performance performance) {
+        return plays.get(performance.getPlayID());
     }
 
-    private int getAmount(Performance performance) {
+    public int getAmount(Performance performance) {
         int result = 0;
         final Play play = getPlay(performance);
 
@@ -112,5 +113,4 @@ public class StatementPrinter {
         }
         return result;
     }
-
 }
