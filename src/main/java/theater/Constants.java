@@ -30,7 +30,7 @@ public final class Constants {
     public static final int PASTORAL_OVER_BASE_CAPACITY_PER_PERSON = 2500;
     public static final int PASTORAL_AUDIENCE_THRESHOLD = 20;
     public static final int PASTORAL_VOLUME_CREDIT_THRESHOLD = 20;
-    public static final int TRAGEDY_EXTRA_PER_AUDIENCE = 1000
+    public static final int TRAGEDY_EXTRA_PER_AUDIENCE = 1000;
 
     private Constants() {
 
